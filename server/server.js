@@ -6,8 +6,6 @@ import express from 'express'; // ES6 and newer javascript
 
 import authMiddleware from './middlewares/auth.js';
 
-import projectsRoutes from './routes/projects-routes.js';
-import userRoutes from './routes/user-routes.js';
 
 
 // Establish DB Connection
@@ -22,8 +20,7 @@ const app = express();
 
 app.use(express.json()); // for parsing application/json
 
-app.use('/projects', authMiddleware, projectsRoutes);
-app.use('/users', userRoutes);
+app.use('/guild', guildRoutes)
 
 
 app.listen(3001);

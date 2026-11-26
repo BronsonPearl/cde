@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
-import { AppBar, Button, Container, Stack, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, Button, Container, Stack, Toolbar, Typography } from '@mui/material'
 import Home from './core/Home.jsx'
-// import GreetingForm from './core/GreetingForm.jsx'
-import Login from './components/login.jsx'
-import Register from './components/register.jsx'
-import ProjectList from './components/project-list.jsx'
-import ProjectDetails from './components/project-details.jsx'
+import RosterPage from './components/Roster.jsx'
+import JoinPage from './components/JoinForm.jsx'
+import PhotosPage from './components/PhotosPage.jsx'
+import emblem from './assets/images/cdeEmblem.jpg'
+import { BRAND_RED, GUILD_NAME } from './guildConfig.js'
 
 const MainRouter = () => {
   const [token, setToken] = useState(() => localStorage.getItem('token') || '')
@@ -19,34 +19,25 @@ const MainRouter = () => {
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="static" sx={{ bgcolor: BRAND_RED }}>
         <Toolbar sx={{ gap: 2, flexWrap: 'wrap' }}>
-          <Typography component="span" variant="h6" sx={{ flexGrow: 1 }}>COMP229 WT6 MERN SKELETON</Typography>
+        <Box component="img" src={emblem} alt="" sx={{ height: 44, width: 44, borderRadius: '50%' }} />
+        <Typography component="span" variant="h6" sx={{ flexGrow: 1 }}>Chug.exe</Typography>
+          <Box component={Link} to="/" aria-label={`${GUILD_NAME} home`} sx={{ display: 'flex', mr: 1 }}>
+          </Box>
           <Button color="inherit" component={Link} to="/">Home</Button>
-          <Button color="inherit" component={Link} to="/projects">CRUD Spot</Button>
-          {token
-            ? <Button color="inherit" onClick={() => onAuth('')}>Sign out</Button>
-            : <>
-              <Button color="inherit" component={Link} to="/register">Register</Button>
-              <Button color="inherit" component={Link} to="/login">Login</Button>
-            </>}
+          <Button color="inherit" component={Link} to="/roster">Roster</Button>
+          <Button color="inherit" component={Link} to="/join">Join the guild</Button>
+          <Button color="inherit" component={Link} to="/photos">Photos</Button>
+          {token && <Button color="inherit" onClick={() => onAuth('')}>Sign out</Button>}
         </Toolbar>
       </AppBar>
       <Container maxWidth="md" sx={{ pb: 4 }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login onAuth={onAuth} />} />
-          <Route path="/register" element={<Register onAuth={onAuth} />} />
-          <Route path="/projects" element={token
-            ? <ProjectList token={token} onAuth={onAuth} />
-            : <Navigate to="/login" replace />} />
-          <Route path="/project-details" element={token
-            ? <ProjectDetails key="create" token={token} onAuth={onAuth} />
-            : <Navigate to="/login" replace />} />
-          <Route path="/project-details/:id" element={token
-            ? <ProjectDetails key="edit" token={token} onAuth={onAuth} />
-            : <Navigate to="/login" replace />} />
-          {/* <Route path="/practice/:name" element={<GreetingForm />} /> */}
+          <Route path="/roster" element={<RosterPage />} />
+          <Route path="/join" element={<JoinPage />} />
+          <Route path="/photos" element={<PhotosPage />} />
           <Route path="*" element={
             <Stack spacing={2}>
               <Typography component="h1" variant="h4">Page not found</Typography>
