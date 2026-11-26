@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { Alert, Box, Button, MenuItem, Paper, TextField, Typography } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
+import { Alert, Box, Button, Link, MenuItem, Paper, TextField, Typography } from '@mui/material';
 import { API, CLASSES, FOCUSES, ROLES } from '../guildConfig.js';
- 
+
 const EMPTY = { name: '', level: '', cls: '', spec: '', role: 'DPS', focus: FOCUSES[0], currentRank: '',
   highestRank: '', discord: '', voice: 'Yes, I have a mic', availability: '', experience: '', goals: '',
   website: '' /* honeypot, keep hidden */ };
- 
+
 function JoinFormFields() {
   const [f, setF] = useState(EMPTY);
   const [state, setState] = useState({ status: 'idle', message: '' });
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
- 
+
   const submit = async (e) => {
     e.preventDefault();
     if (!f.name.trim() || !f.cls || !f.discord.trim()) {
@@ -21,14 +22,14 @@ function JoinFormFields() {
       const res = await fetch(`${API}/guild/applications`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f),
       });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Request failed');
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `Request failed (status ${res.status})`);
       setF(EMPTY);
       setState({ status: 'done', message: 'Application sent. An officer will contact you on Discord.' });
     } catch (err) {
       setState({ status: 'error', message: `Could not send your application: ${err.message}. Try again.` });
     }
   };
- 
+
   return (
     <Paper variant="outlined" component="form" onSubmit={submit} noValidate
       sx={{ p: 2.5, display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
@@ -54,12 +55,16 @@ function JoinFormFields() {
       <TextField label="Availability and time zone" value={f.availability} onChange={set('availability')} sx={{ gridColumn: '1 / -1' }} />
       <TextField multiline minRows={3} label="PvP experience and previous guilds" value={f.experience} onChange={set('experience')} sx={{ gridColumn: '1 / -1' }} />
       <TextField multiline minRows={3} label="What are your PvP goals?" value={f.goals} onChange={set('goals')} sx={{ gridColumn: '1 / -1' }} />
- 
+
       {/* Honeypot: hidden from people, bots fill it in */}
       <input tabIndex={-1} autoComplete="off" aria-hidden="true" value={f.website} onChange={set('website')}
         style={{ position: 'absolute', left: '-9999px', height: 0, width: 0, opacity: 0 }} />
- 
+
       <Box sx={{ gridColumn: '1 / -1' }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Your application is shared with our officers on Discord.{' '}
+          <Link component={RouterLink} to="/privacy">Read our privacy notice</Link>.
+        </Typography>
         <Button type="submit" variant="contained" disabled={state.status === 'sending'}>
           {state.status === 'sending' ? 'Sending…' : 'Send application'}
         </Button>
@@ -68,7 +73,7 @@ function JoinFormFields() {
     </Paper>
   );
 }
- 
+
 export default function JoinPage() {
   return (
     <Box sx={{ py: 4 }}>
@@ -80,4 +85,3 @@ export default function JoinPage() {
     </Box>
   );
 }
- 

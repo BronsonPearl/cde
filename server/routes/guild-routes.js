@@ -13,6 +13,50 @@ const MEMBER_FIELDS = ['name', 'cls', 'role', 'guildRank', 'pvpRank', 'title', '
 const APPLICATION_FIELDS = ['name', 'level', 'cls', 'spec', 'role', 'focus', 'currentRank',
   'highestRank', 'discord', 'voice', 'availability', 'experience', 'goals'];
 
+/* ---------- Discord notification ---------- */
+
+const clip = (v, n = 900) => {
+  const t = String(v ?? '').trim();
+  return t.length > n ? t.slice(0, n - 1) + '…' : t;
+};
+
+// Posts a summary of a new application to a Discord channel (if DISCORD_WEBHOOK_URL is set)
+async function notifyDiscord(a) {
+  const url = process.env.DISCORD_WEBHOOK_URL;
+  if (!url) return;
+
+  const field = (name, value, inline = true) => (value ? { name, value: clip(value), inline } : null);
+  const fields = [
+    field('Class', [a.cls, a.spec].filter(Boolean).join(', ')),
+    field('Role', a.role),
+    field('Level', a.level),
+    field('PvP focus', a.focus),
+    field('Current rank', a.currentRank),
+    field('Highest rank / titles', a.highestRank),
+    field('Discord', a.discord),
+    field('Voice chat', a.voice),
+    field('Availability', a.availability, false),
+    field('PvP experience', a.experience, false),
+    field('Goals', a.goals, false),
+  ].filter(Boolean);
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: 'CDE Recruitment',
+      allowed_mentions: { parse: [] }, // applicants can't ping @everyone through the form
+      embeds: [{
+        title: clip(`New application: ${a.name}`, 250),
+        color: 0xb1002e,
+        fields,
+        timestamp: new Date().toISOString(),
+      }],
+    }),
+  });
+  if (!res.ok) throw new Error(`Discord responded with ${res.status}`);
+}
+
 /* ---------- Roster ---------- */
 
 // Public: anyone can see the roster
@@ -51,8 +95,11 @@ router.post('/applications', async (req, res) => {
   if (!data.name?.trim() || !data.cls || !data.discord?.trim()) {
     return res.status(400).json({ error: 'Character name, class and Discord are required.' });
   }
-  await Application.create(data);
+  const saved = await Application.create(data);
   res.status(201).json({ ok: true });
+
+  // Don't make the applicant wait for Discord, and don't fail the form if Discord is down
+  notifyDiscord(saved).catch((err) => console.error('Discord notification failed:', err.message));
 });
 
 // Officers (logged in): review applications

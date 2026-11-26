@@ -26,3 +26,7 @@ export const API = import.meta.env.VITE_API_URL ?? '';
 // Branding (red sampled from the emblem image)
 export const BRAND_RED = '#b1002e';
 export const TAGLINE = 'A PvP guild for World of Warcraft: Forever';
+
+// Privacy page: how people reach you about their data, and when the page was last changed
+export const PRIVACY_CONTACT = 'an officer on our Discord server';
+export const PRIVACY_UPDATED = 'November 26, 2026';

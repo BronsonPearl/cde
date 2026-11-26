@@ -5,7 +5,7 @@ dotenv.config(); // Load environment variables from .env file
 import express from 'express'; // ES6 and newer javascript
 
 import authMiddleware from './middlewares/auth.js';
-
+import guildRoutes from './routes/guild-routes.js';
 
 
 // Establish DB Connection
